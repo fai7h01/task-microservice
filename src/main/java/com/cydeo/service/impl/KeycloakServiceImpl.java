@@ -1,4 +1,4 @@
-package com.cydeo.impl;
+package com.cydeo.service.impl;
 
 import com.cydeo.config.KeycloakProperties;
 import com.cydeo.exception.UserNotFoundException;

@@ -1,4 +1,4 @@
-package com.cydeo;
+package com.cydeo.service;
 
 import com.cydeo.dto.TaskDTO;
 import com.cydeo.enums.Status;

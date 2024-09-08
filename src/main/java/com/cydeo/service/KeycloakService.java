@@ -1,4 +1,4 @@
-package com.cydeo;
+package com.cydeo.service;
 
 import java.util.List;
 
