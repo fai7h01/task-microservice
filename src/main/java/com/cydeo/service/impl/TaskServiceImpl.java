@@ -228,6 +228,10 @@ public class TaskServiceImpl implements TaskService {
         if (!Objects.requireNonNull(userResponse.getBody()).getData().equals(true)){
             throw new EmployeeNotFoundException("Employee does not exist.");
         }
+
+        if (!keycloakService.hasClientRole(assignedEmployee, "Employee")){
+            throw new UserNotEmployeeException("User is not employee.");
+        }
     }
 
     private void checkAccess(Task task) {
