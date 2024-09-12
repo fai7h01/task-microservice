@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: task-service
   jpa:
     properties:
       hibernate:
