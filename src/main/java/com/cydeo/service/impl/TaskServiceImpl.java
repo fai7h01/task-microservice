@@ -4,6 +4,7 @@ import com.cydeo.client.ProjectClient;
 import com.cydeo.client.UserClient;
 import com.cydeo.dto.ProjectResponse;
 import com.cydeo.dto.TaskDTO;
+import com.cydeo.dto.UserResponse;
 import com.cydeo.entity.Task;
 import com.cydeo.enums.Status;
 import com.cydeo.exception.*;
@@ -207,7 +208,6 @@ public class TaskServiceImpl implements TaskService {
 
     private void checkProjectExists(String projectCode) {
 
-        //TODO Check if project exists or not by asking about it to project-service
         ResponseEntity<ProjectResponse> projectResponse = projectClient.checkProjectExistsByProjectCode(projectCode);
         if (!Objects.requireNonNull(projectResponse.getBody()).isSuccess()) {
             throw new ProjectCheckFailedException("Project check is failed.");
@@ -220,8 +220,14 @@ public class TaskServiceImpl implements TaskService {
 
     private void checkEmployeeExists(String assignedEmployee) {
 
-        //TODO Check if employee exists or not by asking about it to user-service
+        ResponseEntity<UserResponse> userResponse = userClient.checkUserExistsByUsername(assignedEmployee);
+        if (!Objects.requireNonNull(userResponse.getBody()).isSuccess()) {
+            throw new EmployeeCheckFailedException("Employee check failed.");
+        }
 
+        if (!Objects.requireNonNull(userResponse.getBody()).getData().equals(true)){
+            throw new EmployeeNotFoundException("Employee does not exist.");
+        }
     }
 
     private void checkAccess(Task task) {
