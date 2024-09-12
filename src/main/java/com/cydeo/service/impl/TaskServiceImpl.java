@@ -1,24 +1,22 @@
 package com.cydeo.service.impl;
 
+import com.cydeo.client.ProjectClient;
+import com.cydeo.client.UserClient;
+import com.cydeo.dto.ProjectResponse;
 import com.cydeo.dto.TaskDTO;
 import com.cydeo.entity.Task;
 import com.cydeo.enums.Status;
-import com.cydeo.exception.ProjectAccessDeniedException;
-import com.cydeo.exception.TaskAccessDeniedException;
-import com.cydeo.exception.TaskAlreadyExistsException;
-import com.cydeo.exception.TaskNotFoundException;
+import com.cydeo.exception.*;
 import com.cydeo.repository.TaskRepository;
 import com.cydeo.service.KeycloakService;
 import com.cydeo.service.TaskService;
 import com.cydeo.util.MapperUtil;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,11 +25,16 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final MapperUtil mapperUtil;
     private final KeycloakService keycloakService;
+    private final ProjectClient projectClient;
+    private final UserClient userClient;
 
-    public TaskServiceImpl(TaskRepository taskRepository, MapperUtil mapperUtil, KeycloakService keycloakService) {
+    public TaskServiceImpl(TaskRepository taskRepository, MapperUtil mapperUtil, KeycloakService keycloakService,
+                           ProjectClient projectClient, UserClient userClient) {
         this.taskRepository = taskRepository;
         this.mapperUtil = mapperUtil;
         this.keycloakService = keycloakService;
+        this.projectClient = projectClient;
+        this.userClient = userClient;
     }
 
     @Override
@@ -205,7 +208,14 @@ public class TaskServiceImpl implements TaskService {
     private void checkProjectExists(String projectCode) {
 
         //TODO Check if project exists or not by asking about it to project-service
+        ResponseEntity<ProjectResponse> projectResponse = projectClient.checkProjectExistsByProjectCode(projectCode);
+        if (!Objects.requireNonNull(projectResponse.getBody()).isSuccess()) {
+            throw new ProjectCheckFailedException("Project check is failed.");
+        }
 
+        if (!Objects.requireNonNull(projectResponse.getBody()).getData().equals(true)){
+            throw new ProjectNotFoundException("Project does not exist.");
+        }
     }
 
     private void checkEmployeeExists(String assignedEmployee) {
