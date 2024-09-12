@@ -213,7 +213,7 @@ public class TaskServiceImpl implements TaskService {
             throw new ProjectCheckFailedException("Project check is failed.");
         }
 
-        if (!Objects.requireNonNull(projectResponse.getBody()).getData().equals(true)){
+        if (!Objects.requireNonNull(projectResponse.getBody()).getData().equals(true)) {
             throw new ProjectNotFoundException("Project does not exist.");
         }
     }
@@ -225,11 +225,11 @@ public class TaskServiceImpl implements TaskService {
             throw new EmployeeCheckFailedException("Employee check failed.");
         }
 
-        if (!Objects.requireNonNull(userResponse.getBody()).getData().equals(true)){
+        if (!Objects.requireNonNull(userResponse.getBody()).getData().equals(true)) {
             throw new EmployeeNotFoundException("Employee does not exist.");
         }
 
-        if (!keycloakService.hasClientRole(assignedEmployee, "Employee")){
+        if (!keycloakService.hasClientRole(assignedEmployee, "Employee")) {
             throw new UserNotEmployeeException("User is not employee.");
         }
     }
@@ -250,8 +250,16 @@ public class TaskServiceImpl implements TaskService {
 
     private void checkCreateAccessToTaskProject(String loggedInUserUsername, String projectCode) {
 
-        //TODO Check if logged in user has access to the project of the task to create tasks for that project
-        //     by asking about it to project-service
+        ResponseEntity<ProjectResponse> response = projectClient.getManagerByProject(projectCode);
+
+        if (Objects.requireNonNull(response.getBody()).isSuccess()) {
+            String taskProjectManager = (String) response.getBody().getData();
+            if (!loggedInUserUsername.equals(taskProjectManager)) {
+                throw new ProjectAccessDeniedException("Access denied, make sure to work on your own project.");
+            }
+        } else {
+            throw new ManagerNotRetrievedException("Manager can not be retrieved.");
+        }
 
     }
 
